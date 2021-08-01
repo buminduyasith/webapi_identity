@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using webapi_identity.Repositorys;
+using webapi_identity.Repositories;
 
 namespace webapi_identity.Controllers
 {

@@ -13,7 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using webapi_identity.configuration;
 using webapi_identity.DTOs;
-using webapi_identity.Repositorys;
+using webapi_identity.Repositories;
 
 namespace webapi_identity.Controllers
 {

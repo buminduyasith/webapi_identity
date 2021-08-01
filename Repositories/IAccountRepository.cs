@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using webapi_identity.DTOs;
 
-namespace webapi_identity.Repositorys
+namespace webapi_identity.Repositories
 {
     public interface IAccountRepository
     {

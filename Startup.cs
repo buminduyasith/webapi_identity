@@ -18,7 +18,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using webapi_identity.configuration;
 using webapi_identity.DataAccess;
-using webapi_identity.Repositorys;
+using webapi_identity.Repositories;
 using webapi_identity.Services;
 
 namespace webapi_identity

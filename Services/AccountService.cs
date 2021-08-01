@@ -1,5 +1,5 @@
 using System;
-using webapi_identity.Repositorys;
+using webapi_identity.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using webapi_identity.configuration;
