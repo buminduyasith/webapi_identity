@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using webapi_identity.Repositorys;
 
 namespace webapi_identity.Controllers
 {
@@ -23,11 +24,13 @@ namespace webapi_identity.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IRepoWeather _weather;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, UserManager<IdentityUser> userManager)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, UserManager<IdentityUser> userManager, IRepoWeather weather)
         {
             _logger = logger;
             _userManager = userManager;
+            _weather = weather;
         }
 
 
@@ -53,7 +56,7 @@ namespace webapi_identity.Controllers
             // model.LastName = user.LastName;
             // model.PhoneNumber = user.PhoneNumber;
 
-
+            _weather.UserInfo();
             return Ok(new
             {
                 id = rng,

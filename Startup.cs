@@ -18,6 +18,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using webapi_identity.configuration;
 using webapi_identity.DataAccess;
+using webapi_identity.Repositorys;
+using webapi_identity.Services;
 
 namespace webapi_identity
 {
@@ -73,6 +75,7 @@ namespace webapi_identity
 
 
 
+
             services.AddDbContext<TestDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlDatabase"));
@@ -104,6 +107,8 @@ namespace webapi_identity
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<TestDbContext>();
+
+            services.AddScoped<IRepoWeather, WeatherService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
