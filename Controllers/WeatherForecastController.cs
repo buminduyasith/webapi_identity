@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace webapi_identity.Controllers
 {
@@ -20,23 +22,53 @@ namespace webapi_identity.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, UserManager<IdentityUser> userManager)
         {
             _logger = logger;
+            _userManager = userManager;
         }
 
+
+
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<IActionResult> Get()
         {
+            //<IEnumerable<WeatherForecast>>
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+
+
+
+            //  var userId = _userManager.GetUserId(currentUser);
+            //var userId = currentUser.
             var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+
+            var userId = currentUser.FindFirst("Id").Value;
+            var user = await _userManager.FindByIdAsync(userId);
+
+            // ProfileUpdateModel model = new ProfileUpdateModel();
+            // model.Email = user.Email;
+            // model.FirstName = user.FirstName;
+            // model.LastName = user.LastName;
+            // model.PhoneNumber = user.PhoneNumber;
+
+
+            return Ok(new
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+                id = rng,
+                name = userId,
+                user = user
+            });
+
+
+            // return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            // {
+            //     Date = DateTime.Now.AddDays(index),
+            //     TemperatureC = rng.Next(-20, 55),
+            //     Summary = Summaries[rng.Next(Summaries.Length)]
+            // })
+            // .ToArray();
         }
     }
 }
