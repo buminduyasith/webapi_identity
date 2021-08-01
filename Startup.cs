@@ -108,7 +108,7 @@ namespace webapi_identity
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<TestDbContext>();
 
-            services.AddScoped<IRepoWeather, WeatherService>();
+            services.AddScoped<IAccountRepository, AccountService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

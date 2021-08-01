@@ -24,9 +24,9 @@ namespace webapi_identity.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly IRepoWeather _weather;
+        private readonly IAccountRepository _weather;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, UserManager<IdentityUser> userManager, IRepoWeather weather)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, UserManager<IdentityUser> userManager, IAccountRepository weather)
         {
             _logger = logger;
             _userManager = userManager;
@@ -56,7 +56,7 @@ namespace webapi_identity.Controllers
             // model.LastName = user.LastName;
             // model.PhoneNumber = user.PhoneNumber;
 
-            _weather.UserInfo();
+            //  _weather.UserInfo();
             return Ok(new
             {
                 id = rng,
