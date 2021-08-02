@@ -27,15 +27,15 @@ namespace webapi_identity.Controllers
         private readonly ILogger<AccountsController> _logger;
         private readonly JwtConfig _jwtConfig;
 
-        private readonly IAccountRepository _weather;
+        private readonly IAccountRepository _accountRepository;
 
         public AccountsController(UserManager<IdentityUser> userManager,
-        IOptionsMonitor<JwtConfig> optionsMonitor, ILogger<AccountsController> logger, IAccountRepository weather)
+        IOptionsMonitor<JwtConfig> optionsMonitor, ILogger<AccountsController> logger, IAccountRepository accountRepository)
         {
             _userManager = userManager;
             _logger = logger;
             _jwtConfig = optionsMonitor.CurrentValue;
-            _weather = weather;
+            _accountRepository = accountRepository;
         }
 
         [HttpPost]
@@ -43,7 +43,7 @@ namespace webapi_identity.Controllers
         public async Task<IActionResult> Register(UserRegistrationRequestDto user)
         {
 
-            var existingUser = await _weather.FindByEmailAsync(user.Email);
+            var existingUser = await _accountRepository.FindByEmailAsync(user.Email);
 
             if (existingUser != null)
             {
@@ -57,28 +57,30 @@ namespace webapi_identity.Controllers
             else
             {
 
-                var jwtToken = await _weather.CreateUser(user);
+                var newUser = await _accountRepository.CreateUser(user);
+                var jwtToken = await _accountRepository.GenerateJwtToken(newUser);
+                return Ok(jwtToken);
 
-                if (jwtToken is string)
-                {
-                    return Ok(new RegistrationResponse()
-                    {
-                        Success = true,
-                        Token = jwtToken.ToString()
+                // if (jwtToken is string)
+                // {
+                //     return Ok(new RegistrationResponse()
+                //     {
+                //         Success = true,
+                //         Token = jwtToken.ToString()
 
-                    });
-                }
-                else
-                {
-                    var r = (IdentityResult)jwtToken;
-                    return BadRequest(new
-                    {
-                        Success = false,
-                        Errors = r.Errors.Select(x => x.Description).ToList(),
-                    });
+                //     });
+                // }
+                // else
+                // {
+                //     var r = (IdentityResult)jwtToken;
+                //     return BadRequest(new
+                //     {
+                //         Success = false,
+                //         Errors = r.Errors.Select(x => x.Description).ToList(),
+                //     });
 
 
-                }
+                // }
             }
 
 
@@ -92,7 +94,7 @@ namespace webapi_identity.Controllers
         {
 
 
-            var existingUser = await _weather.FindByEmailAsync(user.Email);
+            var existingUser = await _accountRepository.FindByEmailAsync(user.Email);
 
             if (existingUser == null)
             {
@@ -105,17 +107,19 @@ namespace webapi_identity.Controllers
 
             else
             {
-                var isSuccessLogin = await _weather.UserLogin(existingUser, user.Password);
+                var isSuccessLogin = await _accountRepository.UserLogin(existingUser, user.Password);
 
                 if (isSuccessLogin)
                 {
-                    var jwtToken = _weather.GenerateJwtToken(existingUser);
+                    var jwtToken = await _accountRepository.GenerateJwtToken(existingUser);
+                    return Ok(jwtToken);
 
-                    return Ok(new RegistrationResponse()
-                    {
-                        Success = true,
-                        Token = jwtToken
-                    });
+
+                    // return Ok(new RegistrationResponse()
+                    // {
+                    //     Success = true,
+                    //     Token = jwtToken
+                    // });
                 }
                 else
                 {
@@ -132,6 +136,10 @@ namespace webapi_identity.Controllers
 
 
         }
+
+
+
+
 
     }
 
