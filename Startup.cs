@@ -99,7 +99,8 @@ namespace webapi_identity
                 // Allow to use seconds for expiration of token
                 // Required only when token lifetime less than 5 minutes
                 // THIS ONE
-                //  ClockSkew = TimeSpan.Zero
+                //token time less than 5min
+                ClockSkew = TimeSpan.Zero
             };
 
             services.AddSingleton(tokenValidationParameters);
