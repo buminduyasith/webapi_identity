@@ -156,6 +156,16 @@ namespace webapi_identity.Controllers
                     });
                 }
 
+                if (res.Errors != null && res.Errors.Count > 0)
+                {
+                    return BadRequest(new
+                    {
+                        result = res,
+                        todo = "res.erros && res.errors.count"
+
+                    });
+                }
+
                 return Ok(res);
             }
 
