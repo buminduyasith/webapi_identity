@@ -49,7 +49,7 @@ namespace webapi_identity.Controllers
             {
                 return BadRequest(new RegistrationResponse()
                 {
-                    Result = false,
+                    Success = false,
                     Errors = new List<string>() { "Email already exist" }
                 });
             }
@@ -63,7 +63,7 @@ namespace webapi_identity.Controllers
                 {
                     return Ok(new RegistrationResponse()
                     {
-                        Result = true,
+                        Success = true,
                         Token = jwtToken.ToString()
 
                     });
@@ -73,7 +73,7 @@ namespace webapi_identity.Controllers
                     var r = (IdentityResult)jwtToken;
                     return BadRequest(new
                     {
-                        Result = false,
+                        Success = false,
                         Errors = r.Errors.Select(x => x.Description).ToList(),
                     });
 
@@ -98,7 +98,7 @@ namespace webapi_identity.Controllers
             {
                 return BadRequest(new RegistrationResponse()
                 {
-                    Result = false,
+                    Success = false,
                     Errors = new List<string>() { "no user found" }
                 });
             }
@@ -113,7 +113,7 @@ namespace webapi_identity.Controllers
 
                     return Ok(new RegistrationResponse()
                     {
-                        Result = true,
+                        Success = true,
                         Token = jwtToken
                     });
                 }
@@ -122,7 +122,7 @@ namespace webapi_identity.Controllers
 
                     return BadRequest(new RegistrationResponse()
                     {
-                        Result = false,
+                        Success = false,
                         Errors = new List<string>(){
                                          "Invalid authentication request"
                                     }
