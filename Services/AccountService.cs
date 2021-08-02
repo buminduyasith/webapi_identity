@@ -20,12 +20,16 @@ namespace webapi_identity.Services
         private readonly ILogger _logger;
         private readonly JwtConfig _jwtConfig;
 
-        public AccountService(UserManager<IdentityUser> userManager, IOptionsMonitor<JwtConfig> optionsMonitor, ILoggerFactory logger)
+        private readonly TokenValidationParameters _tokenValidationParameters;
+
+        public AccountService(UserManager<IdentityUser> userManager, IOptionsMonitor<JwtConfig> optionsMonitor,
+        ILoggerFactory logger, TokenValidationParameters tokenValidationParameters,)
 
         {
             _userManager = userManager;
             _jwtConfig = optionsMonitor.CurrentValue;
             _logger = logger.CreateLogger("weatherService");
+            _tokenValidationParameters = tokenValidationParameters;
         }
 
         public async Task<Object> CreateUser(UserRegistrationRequestDto userRegisterDto)
