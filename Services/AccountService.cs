@@ -11,6 +11,9 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using webapi_identity.DTOs;
+using webapi_identity.Domains;
+using webapi_identity.DataAccess;
+using System.Linq;
 
 namespace webapi_identity.Services
 {
@@ -19,36 +22,47 @@ namespace webapi_identity.Services
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger _logger;
         private readonly JwtConfig _jwtConfig;
-
         private readonly TokenValidationParameters _tokenValidationParameters;
+        private readonly TestDbContext _apiDbContext;
+
+
 
         public AccountService(UserManager<IdentityUser> userManager, IOptionsMonitor<JwtConfig> optionsMonitor,
-        ILoggerFactory logger, TokenValidationParameters tokenValidationParameters,)
+        ILoggerFactory logger, TokenValidationParameters tokenValidationParameters,
+        TestDbContext apiDbContext)
 
         {
             _userManager = userManager;
             _jwtConfig = optionsMonitor.CurrentValue;
             _logger = logger.CreateLogger("weatherService");
             _tokenValidationParameters = tokenValidationParameters;
+            _apiDbContext = apiDbContext;
         }
 
-        public async Task<Object> CreateUser(UserRegistrationRequestDto userRegisterDto)
+        public async Task<IdentityUser> CreateUser(UserRegistrationRequestDto userRegisterDto)
         {
 
 
             var newUser = new IdentityUser() { Email = userRegisterDto.Email, UserName = userRegisterDto.Email };
             var isCreated = await _userManager.CreateAsync(newUser, userRegisterDto.Password);
+            // var jwtToken = await GenerateJwtToken(newUser);
+            // return jwtToken;
 
-            if (isCreated.Succeeded)
-            {
-                var jwtToken = GenerateJwtToken(newUser);
-                return jwtToken;
+            // TODO: what if user not created propely or something went wrong in the database
 
-            }
-            else
-            {
-                return isCreated;
-            }
+
+            return newUser;
+
+            // if (isCreated.Succeeded)
+            // {
+            //     var jwtToken = await GenerateJwtToken(newUser);
+            //     return jwtToken;
+
+            // }
+            // else
+            // {
+            //     return isCreated;
+            // }
         }
 
         public async Task<IdentityUser> FindByEmailAsync(string email)
@@ -58,7 +72,7 @@ namespace webapi_identity.Services
             return existingUser;
         }
 
-        public string GenerateJwtToken(IdentityUser user)
+        public async Task<AuthResult> GenerateJwtToken(IdentityUser user)
         {
             // Now its ime to define the jwt token which will be responsible of creating our tokens
             var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -92,13 +106,43 @@ namespace webapi_identity.Services
 
             var jwtToken = jwtTokenHandler.WriteToken(token);
 
-            return jwtToken;
+            var refreshToken = new RefreshToken()
+            {
+                JwtId = token.Id,
+                IsUsed = false,
+                UserId = user.Id,
+                AddedDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddYears(1),
+                IsRevoked = false,
+                Token = RandomString(25) + Guid.NewGuid()
+            };
+
+            await _apiDbContext.RefreshToken.AddAsync(refreshToken);
+
+            await _apiDbContext.SaveChangesAsync();
+
+            return new AuthResult()
+            {
+                Token = jwtToken,
+                Success = true,
+                RefreshToken = refreshToken.Token
+            };
         }
 
         public async Task<bool> UserLogin(IdentityUser identityUser, string password)
         {
             var isCorrect = await _userManager.CheckPasswordAsync(identityUser, password);
             return isCorrect;
+
+            // TODO: what if user not created propely or something went wrong in the database
+        }
+
+        private string RandomString(int length)
+        {
+            var random = new Random();
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(x => x[random.Next(x.Length)]).ToArray());
         }
 
 
