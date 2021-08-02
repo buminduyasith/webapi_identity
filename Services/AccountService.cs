@@ -98,7 +98,7 @@ namespace webapi_identity.Services
             }),
                 // the life span of the token needs to be shorter and utilise refresh token to keep the user signedin
                 // but since this is a demo app we can extend it to fit our current need
-                Expires = DateTime.UtcNow.AddSeconds(30),
+                Expires = DateTime.UtcNow.AddHours(1),
                 // here we are adding the encryption alogorithim information which will be used to decrypt our token
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
             };
@@ -153,13 +153,15 @@ namespace webapi_identity.Services
             {
                 // This validation function will make sure that the token meets the validation parameters
                 // and its an actual jwt token not just a random string
+                // _tokenValidationParameters.ValidateLifetime = false;
                 var principal = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
-
+                // _tokenValidationParameters.ValidateLifetime = true;
                 // Now we need to check if the token has a valid security algorithm
                 if (validatedToken is JwtSecurityToken jwtSecurityToken)
                 {
-                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, StringComparison.InvariantCultureIgnoreCase);
 
+                    _logger.LogError(jwtSecurityToken.Header.Alg);
                     if (result == false)
                     {
                         return null;
