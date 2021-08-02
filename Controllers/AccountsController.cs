@@ -137,7 +137,36 @@ namespace webapi_identity.Controllers
 
         }
 
+        [HttpPost]
+        [Route("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
+        {
+            if (ModelState.IsValid)
+            {
+                var res = await _accountRepository.VerifyToken(tokenRequest);
 
+                if (res == null)
+                {
+                    return BadRequest(new RegistrationResponse()
+                    {
+                        Errors = new List<string>() {
+                    "Invalid tokens"
+                },
+                        Success = false
+                    });
+                }
+
+                return Ok(res);
+            }
+
+            return BadRequest(new RegistrationResponse()
+            {
+                Errors = new List<string>() {
+                "Invalid payload"
+            },
+                Success = false
+            });
+        }
 
 
 
