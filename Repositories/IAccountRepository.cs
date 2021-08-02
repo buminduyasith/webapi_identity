@@ -14,5 +14,7 @@ namespace webapi_identity.Repositories
         Task<AuthResult> GenerateJwtToken(IdentityUser user);
 
         Task<bool> UserLogin(IdentityUser identityUser, string password);
+
+        Task<AuthResult> VerifyToken(TokenRequest tokenRequest);
     }
 }
