@@ -42,49 +42,9 @@ namespace webapi_identity.Controllers
         [Route("signup")]
         public async Task<IActionResult> Register(UserRegistrationRequestDto user)
         {
-
-            var existingUser = await _accountRepository.FindByEmailAsync(user.Email);
-
-            if (existingUser != null)
-            {
-                return BadRequest(new RegistrationResponse()
-                {
-                    Success = false,
-                    Errors = new List<string>() { "Email already exist" }
-                });
-            }
-
-            else
-            {
-
-                var newUser = await _accountRepository.CreateUser(user);
-                var jwtToken = await _accountRepository.GenerateJwtToken(newUser);
-                return Ok(jwtToken);
-
-                // if (jwtToken is string)
-                // {
-                //     return Ok(new RegistrationResponse()
-                //     {
-                //         Success = true,
-                //         Token = jwtToken.ToString()
-
-                //     });
-                // }
-                // else
-                // {
-                //     var r = (IdentityResult)jwtToken;
-                //     return BadRequest(new
-                //     {
-                //         Success = false,
-                //         Errors = r.Errors.Select(x => x.Description).ToList(),
-                //     });
-
-
-                // }
-            }
-
-
-
+            var newUser = await _accountRepository.CreateUser(user);
+            var jwtToken = await _accountRepository.GenerateJwtToken(newUser);
+            return Ok(jwtToken);
         }
 
 
@@ -93,48 +53,8 @@ namespace webapi_identity.Controllers
         public async Task<IActionResult> Signin([FromBody] UserLoginRequest user)
         {
 
-
-            var existingUser = await _accountRepository.FindByEmailAsync(user.Email);
-
-            if (existingUser == null)
-            {
-                return BadRequest(new RegistrationResponse()
-                {
-                    Success = false,
-                    Errors = new List<string>() { "no user found" }
-                });
-            }
-
-            else
-            {
-                var isSuccessLogin = await _accountRepository.UserLogin(existingUser, user.Password);
-
-                if (isSuccessLogin)
-                {
-                    var jwtToken = await _accountRepository.GenerateJwtToken(existingUser);
-                    return Ok(jwtToken);
-
-
-                    // return Ok(new RegistrationResponse()
-                    // {
-                    //     Success = true,
-                    //     Token = jwtToken
-                    // });
-                }
-                else
-                {
-
-                    return BadRequest(new RegistrationResponse()
-                    {
-                        Success = false,
-                        Errors = new List<string>(){
-                                         "Invalid authentication request"
-                                    }
-                    });
-                }
-            }
-
-
+            var result = await _accountRepository.UserLogin(user);
+            return Ok(result);
         }
 
         [HttpPost]

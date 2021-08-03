@@ -18,6 +18,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using webapi_identity.configuration;
 using webapi_identity.DataAccess;
+using webapi_identity.Middlewarers;
 using webapi_identity.Repositories;
 using webapi_identity.Services;
 
@@ -37,6 +38,8 @@ namespace webapi_identity
         {
 
             services.AddControllers();
+
+
 
             // services.AddSwaggerGen(c =>
             // {
@@ -118,6 +121,8 @@ namespace webapi_identity
             });
 
 
+            services.AddTransient<ExceptionHandlingMiddleware>();
+
 
 
             //end update
@@ -163,6 +168,7 @@ namespace webapi_identity
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             app.UseAuthentication();
             app.UseAuthorization();
