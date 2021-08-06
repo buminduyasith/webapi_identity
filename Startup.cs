@@ -26,6 +26,7 @@ namespace webapi_identity
 {
     public class Startup
     {
+        private readonly string MyAllowSpecificOrigins = "CorsPolicy";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -153,6 +154,16 @@ namespace webapi_identity
                 .AddEntityFrameworkStores<TestDbContext>();
 
             services.AddScoped<IAccountRepository, AccountService>();
+
+            services.AddCors(options =>
+           {
+               options.AddPolicy(MyAllowSpecificOrigins,
+                   builder => builder
+                       .AllowAnyMethod()
+                       .AllowCredentials()
+                       .SetIsOriginAllowed((host) => true)
+                       .AllowAnyHeader());
+           });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -168,6 +179,7 @@ namespace webapi_identity
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors(MyAllowSpecificOrigins);
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             app.UseAuthentication();
