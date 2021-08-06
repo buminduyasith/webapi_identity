@@ -315,60 +315,63 @@ namespace webapi_identity.Services
 
         public AuthResult VerifyFBIdToken(TokenRequest tokenRequest)
         {
-            var jwtTokenHandler = new JwtSecurityTokenHandler();
 
-            try
-            {
-                // This validation function will make sure that the token meets the validation parameters
-                // and its an actual jwt token not just a random string
+                
 
-                var principal = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
+            // var jwtTokenHandler = new JwtSecurityTokenHandler();
 
-                // Now we need to check if the token has a valid security algorithm
-                if (validatedToken is JwtSecurityToken jwtSecurityToken)
-                {
-                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256, StringComparison.InvariantCultureIgnoreCase);
+            // try
+            // {
+            //     // This validation function will make sure that the token meets the validation parameters
+            //     // and its an actual jwt token not just a random string
 
+            //     var principal = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
 
-                    _logger.LogError(jwtSecurityToken.Header.Alg);
-                    if (result == false)
-                    {
-                        return null;
-                    }
-                }
-
-                // Will get the time stamp in unix time
-
-                var utcExpiryDate = long.Parse(principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
-
-                // we convert the expiry date from seconds to the date
-                var expDate = UnixTimeStampToDateTime(utcExpiryDate);
-
-                if (expDate > DateTime.UtcNow)
-                {
-                    return new AuthResult()
-                    {
-                        Errors = new List<string>() { "We cannot refresh this since the token has not expired" },
-                        Success = false
-                    };
-                }
+            //     // Now we need to check if the token has a valid security algorithm
+            //     if (validatedToken is JwtSecurityToken jwtSecurityToken)
+            //     {
+            //         var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256, StringComparison.InvariantCultureIgnoreCase);
 
 
-                return new AuthResult()
-                {
-                    Errors = new List<string>() { "We cannot refresh this since the token has not expired" },
-                    Success = false
-                };
+            //         _logger.LogError(jwtSecurityToken.Header.Alg);
+            //         if (result == false)
+            //         {
+            //             return null;
+            //         }
+            //     }
 
-                // Check the token we got if its saved in the db
+            //     // Will get the time stamp in unix time
 
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
+            //     var utcExpiryDate = long.Parse(principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
 
-                return null;
-            }
+            //     // we convert the expiry date from seconds to the date
+            //     var expDate = UnixTimeStampToDateTime(utcExpiryDate);
+
+            //     if (expDate > DateTime.UtcNow)
+            //     {
+            //         return new AuthResult()
+            //         {
+            //             Errors = new List<string>() { "We cannot refresh this since the token has not expired" },
+            //             Success = false
+            //         };
+            //     }
+
+
+            //     return new AuthResult()
+            //     {
+            //         Errors = new List<string>() { "We cannot refresh this since the token has not expired" },
+            //         Success = false
+            //     };
+
+            //     // Check the token we got if its saved in the db
+
+            // }
+            // catch (Exception ex)
+            // {
+            //     _logger.LogError(ex.Message);
+
+            //     return null;
+            // }
         }
 
 
