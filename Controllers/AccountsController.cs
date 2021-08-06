@@ -104,6 +104,7 @@ namespace webapi_identity.Controllers
         public IActionResult Idtoken([FromBody] TokenRequest idToken)
         {
             //_accountRepository.VerifyFBIdToken(idTOken);
+            _logger.LogInformation("run");
             return Ok(idToken);
         }
 
