@@ -27,11 +27,13 @@ namespace webapi_identity.Services
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly TestDbContext _apiDbContext;
 
+        private readonly SignInManager<IdentityUser> _signInManager;
+
 
 
         public AccountService(UserManager<IdentityUser> userManager, IOptionsMonitor<JwtConfig> optionsMonitor,
         ILoggerFactory logger, TokenValidationParameters tokenValidationParameters,
-        TestDbContext apiDbContext)
+        TestDbContext apiDbContext, SignInManager<IdentityUser> signInManager)
 
         {
             _userManager = userManager;
@@ -39,6 +41,7 @@ namespace webapi_identity.Services
             _logger = logger.CreateLogger("weatherService");
             _tokenValidationParameters = tokenValidationParameters;
             _apiDbContext = apiDbContext;
+            _signInManager = signInManager;
         }
 
         public async Task<IdentityUser> CreateUser(UserRegistrationRequestDto userRegisterDto)
@@ -137,6 +140,8 @@ namespace webapi_identity.Services
             };
         }
 
+
+
         public async Task<AuthResult> UserLogin(UserLoginRequest user)
         {
 
@@ -147,6 +152,11 @@ namespace webapi_identity.Services
                 throw new UserNotFoundException("User Not found");
             }
 
+            //    var result = await  _signInManager.PasswordSignInAsync(user.Email,user.Password,false,lockoutOnFailure: false);
+            //    if(result.Succeeded){
+            //        _logger.LogInformation()
+            //    }
+            //     ----------------start
             var isSuccessLogin = await _userManager.CheckPasswordAsync(existingUser, user.Password);
 
             if (isSuccessLogin)
@@ -159,6 +169,8 @@ namespace webapi_identity.Services
             {
                 throw new InvalidUserException();
             }
+
+            //  ---------------end
 
 
 
@@ -298,6 +310,65 @@ namespace webapi_identity.Services
             System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
             dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToUniversalTime();
             return dtDateTime;
+        }
+
+
+        public AuthResult VerifyFBIdToken(TokenRequest tokenRequest)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                // This validation function will make sure that the token meets the validation parameters
+                // and its an actual jwt token not just a random string
+
+                var principal = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
+
+                // Now we need to check if the token has a valid security algorithm
+                if (validatedToken is JwtSecurityToken jwtSecurityToken)
+                {
+                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256, StringComparison.InvariantCultureIgnoreCase);
+
+
+                    _logger.LogError(jwtSecurityToken.Header.Alg);
+                    if (result == false)
+                    {
+                        return null;
+                    }
+                }
+
+                // Will get the time stamp in unix time
+
+                var utcExpiryDate = long.Parse(principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+
+                // we convert the expiry date from seconds to the date
+                var expDate = UnixTimeStampToDateTime(utcExpiryDate);
+
+                if (expDate > DateTime.UtcNow)
+                {
+                    return new AuthResult()
+                    {
+                        Errors = new List<string>() { "We cannot refresh this since the token has not expired" },
+                        Success = false
+                    };
+                }
+
+
+                return new AuthResult()
+                {
+                    Errors = new List<string>() { "We cannot refresh this since the token has not expired" },
+                    Success = false
+                };
+
+                // Check the token we got if its saved in the db
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+
+                return null;
+            }
         }
 
 

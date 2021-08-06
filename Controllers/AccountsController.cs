@@ -99,6 +99,14 @@ namespace webapi_identity.Controllers
         }
 
 
+        [HttpPost]
+        [Route("idtoken")]
+        public IActionResult Idtoken([FromBody] TokenRequest idToken)
+        {
+            //_accountRepository.VerifyFBIdToken(idTOken);
+            return Ok(idToken);
+        }
+
 
     }
 
