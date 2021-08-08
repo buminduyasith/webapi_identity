@@ -17,7 +17,9 @@ namespace webapi_identity.Repositories
 
         Task<AuthResult> VerifyToken(TokenRequest tokenRequest);
 
-        AuthResult VerifyFBIdToken(TokenRequest tokenRequest);
+        Task<AuthResult> VerifyFBIdToken(string idToken);
+
+
 
 
     }

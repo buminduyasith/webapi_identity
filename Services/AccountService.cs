@@ -16,6 +16,8 @@ using webapi_identity.DataAccess;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using webapi_identity.Exceptions;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace webapi_identity.Services
 {
@@ -29,11 +31,14 @@ namespace webapi_identity.Services
 
         private readonly SignInManager<IdentityUser> _signInManager;
 
+        private readonly IHttpClientFactory _httpClientFactory;
+
 
 
         public AccountService(UserManager<IdentityUser> userManager, IOptionsMonitor<JwtConfig> optionsMonitor,
         ILoggerFactory logger, TokenValidationParameters tokenValidationParameters,
-        TestDbContext apiDbContext, SignInManager<IdentityUser> signInManager)
+        TestDbContext apiDbContext, SignInManager<IdentityUser> signInManager
+        , IHttpClientFactory httpClientFactory)
 
         {
             _userManager = userManager;
@@ -42,6 +47,7 @@ namespace webapi_identity.Services
             _tokenValidationParameters = tokenValidationParameters;
             _apiDbContext = apiDbContext;
             _signInManager = signInManager;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<IdentityUser> CreateUser(UserRegistrationRequestDto userRegisterDto)
@@ -313,10 +319,41 @@ namespace webapi_identity.Services
         }
 
 
-        public AuthResult VerifyFBIdToken(TokenRequest tokenRequest)
+        public async Task<AuthResult> VerifyFBIdToken(string idToken)
         {
+            String url = $"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}";
+            var result = await _httpClientFactory.CreateClient().GetAsync(url);
+            result.EnsureSuccessStatusCode();
+            var responseAsString = await result.Content.ReadAsStringAsync();
+            TokenIdVerfiyResponse googleUser = JsonConvert.DeserializeObject<TokenIdVerfiyResponse>(responseAsString);
+            // return res;
 
-                
+            var existingUser = await FindByEmailAsync(googleUser.Email);
+
+            if (existingUser != null)
+            {
+                throw new UserAlreadyExistsException("user already exists in the system");
+            }
+
+            var newUser = new IdentityUser() { Email = googleUser.Email, UserName = googleUser.Email.Split(' ', '@')[0] };
+            var isCreated = await _userManager.CreateAsync(newUser);
+
+            if (isCreated.Succeeded)
+            {
+                var jwtToken = await GenerateJwtToken(newUser);
+                return jwtToken;
+
+            }
+
+            else
+            {
+                // TODO: what if user not created propely or something went wrong in the database
+
+                throw new Exception("user not created");
+            }
+
+
+
 
             // var jwtTokenHandler = new JwtSecurityTokenHandler();
 

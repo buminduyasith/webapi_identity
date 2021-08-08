@@ -99,13 +99,14 @@ namespace webapi_identity.Controllers
         }
 
 
-        [HttpPost]
-        [Route("idtoken")]
-        public IActionResult Idtoken([FromBody] TokenRequest idToken)
+        [HttpGet]
+        [Route("loginwithgoogle/{idToken}")]
+        public async Task<IActionResult> Idtoken(string idToken)
         {
-            //_accountRepository.VerifyFBIdToken(idTOken);
+            var jwtToken = await _accountRepository.VerifyFBIdToken(idToken);
+
             _logger.LogInformation("run");
-            return Ok(idToken);
+            return Ok(jwtToken);
         }
 
 

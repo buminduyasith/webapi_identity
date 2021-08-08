@@ -154,6 +154,7 @@ namespace webapi_identity
                 .AddEntityFrameworkStores<TestDbContext>();
 
             services.AddScoped<IAccountRepository, AccountService>();
+            services.AddHttpClient();
 
             services.AddCors(options =>
            {
